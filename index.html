@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix yo' Classes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <!-- End Bootstrap Styles -->
+
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body onload="Table.generate(); Classes.init();">
+    <center>
+        <h1> Schedule </h1>
+    </center>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <form role="form">
+                    <div id="classes-submit" class="form-group">
+                    </div>
+                    <button type="button" class="btn btn-default" onclick="Classes.expand()">More</button>
+                    <button type="submit" class="btn btn-primary">Plan my schedule</button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <table id="week-table" class="table table-bordered">
+                </table>
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-default" onclick="Table.changeSelection(0)">Good</button>
+                <button type="button" class="btn btn-default" onclick="Table.changeSelection(1)">Bad</button>
+                <button type="button" class="btn btn-default" onclick="Table.encoded()">Encoding</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script> 
+    <!-- End Bootstrap JS -->
+    <!-- Custom JS -->
+    <script src="js/table.js"></script>
+    <script src="js/classes.js"></script>
+</body>
+</html>
