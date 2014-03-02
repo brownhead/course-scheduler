@@ -354,7 +354,7 @@ void generate_courses(Course * * courses, unsigned int * ncourses) {
         sprintf(cur_course->name, "CS %u", i);
 
         // Figure out how many secionts there are and allocate memory for them
-        cur_course->nsections = rand() % 10 + 1;
+        cur_course->nsections = rand() % 4 + 1;
         cur_course->sections = malloc(
             sizeof(Section *) * cur_course->nsections);
         cur_course->lengths = malloc(
@@ -429,6 +429,81 @@ void print_courses(Course const * courses, unsigned int ncourses) {
     unsigned int i;
     for (i = 0; i < ncourses; ++i) {
         print_course(courses + i);
+    }
+}
+
+int get_single_conformance(unsigned int const * data, unsigned int data_size,
+        unsigned int day_start, unsigned int day_end,
+        unsigned int time_start, unsigned int time_end,
+        unsigned int day, unsigned int time, unsigned int * result) {
+    if (day < day_start || day > day_end) {
+        return 0;
+    }
+    if (time < time_start || day > time_end) {
+        return 0;
+    }
+
+    unsigned int x = day - day_start, y = time - time_start;
+    unsigned int index = y * (day_end - day_start + 1) + x;
+    if (index >= data_size) {
+        return 0;
+    }
+
+    *result = data[index];
+
+    return 1;
+}
+
+unsigned int const MAX_SECTIONS = 5;
+struct SectionsCombo {
+    unsigned int score;
+    unsigned int sections[MAX_SECTIONS];
+};
+
+void generate_sections_combos(Course const * course, SectionsCombo * * combos,
+        unsigned int * ncombos,
+        unsigned int const * timegrid, unsigned int timegrid_size,
+        unsigned int day_start, unsigned int day_end,
+        unsigned int time_start, unsigned int time_end) {
+    unsigned int product = 1;
+    for (i = 0; i < course->nsections; ++i) {
+        product *= course->lengths[i];
+    }
+    *ncombos = product;
+
+    *combos = malloc(sizeof(SectionsCombo) * (*ncombos));
+
+    // This algorithm relies on a sort-of multiple-base number where each
+    // numeral is a different base. The math to decompose numbers extends well
+    // to this.
+    unsigned int number;
+    for (number = 0; number < *ncombos; ++number) {
+        assert(course->nsections < MAX_SECTIONS);
+        unsigned int temp_number = number;
+        for (i = 0; i < course->nsections; ++i) {
+            unsigned int numeral = temp_number % course->lengths[i];
+            temp_number /= course->lengths[i];
+
+            combos[number].sections[i] = numeral;
+
+            // Go through and average the conformance for the hours
+            unsigned int conformance_sum = 0;
+            unsigned int conformance_count = 0;
+            for (j = course->sections[i]->time_start;
+                    j <= course->sections[i]->time_end; ++j) {
+                for (k = 0; k < 7; ++k) {
+                    if (course->sections[i]->days[k]) {
+                        unsigned int result = 0;
+                        conformance_sum += get_single_conformance(
+                            timegrid, timegrid_size, day_start, day_end,
+                            time_start, time_end, k, i, &result)
+                        conformance_sum += ((unsigned int)result) * 50;
+                        ++conformance_count;
+                    }
+                }
+            }
+            combos[number].score = conformance_sum / conformance_count;
+        }
     }
 }
 
