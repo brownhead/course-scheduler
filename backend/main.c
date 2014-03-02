@@ -287,33 +287,107 @@ int foo(Conformances const * conformances, IndicesHeap * heap,
     return 1;
 }
 
+int decode_hex_grid(char const * data, unsigned int data_size,
+        unsigned int * result) {
+    if (data_size % 2 != 0) {
+        return 0;
+    }
+
+    unsigned int i, j, k;
+    for (i = 0, j = 0; i < data_size; i += 2, ++j) {
+        unsigned int numeral[2];
+        for (k = 0; k < 2; ++k) {
+            if (data[i + k] >= '0' && data[i + k] <= '9') {
+                numeral[k] = data[i + k] - '0';
+            } else if (data[i + k] >= 'A' && data[i + k] <= 'F') {
+                numeral[k] = data[i + k] - 'A' + 10;
+            } else {
+                return 0;
+            }
+        }
+        result[j] = numeral[0] * 16 + numeral[1];
+    }
+}
+
+unsigned int const
+    CONFORMANCES_LIST_CAPACITY = 1000,
+    CONFORMANCES_LENGTHS_CAPACITY = 500,
+    HEAP_CAPACITY = 5000,
+    VISITED_CAPACITY = 8000,
+    SOLUTION_CAPACITY = 500;
+
 int main()
 {
-    unsigned int lists[] = {
-        19, 12, 3,
-        33, 22,
-        5, 4, 3, 2, 1, 0
-    };
-    unsigned int lengths[] = {3, 2, 6};
-    Conformances conformances = {lists, lengths, 3};
+    unsigned int * conformances_lists = malloc(
+        CONFORMANCES_LIST_CAPACITY * sizeof(unsigned int));
+    if (conformances_lists == NULL) {
+        fprintf(stderr, "Failed to allocate conformance_lists.");
+        return 5;
+    }
 
-    unsigned int heap_data[300];
-    IndicesHeap heap = {heap_data, 0, 100, 3};
+    unsigned int * lengths = malloc(
+        CONFORMANCES_LENGTHS_CAPACITY * sizeof(unsigned int));
+    if (lengths == NULL) {
+        fprintf(stderr, "Failed to allocate lengths.");
+        return 5;
+    }
+    //Conformances conformances = {lists, lengths, 3};
 
-    unsigned int visited_data[300];
-    VisitedSet visited = {visited_data, 0, 100, 3};
 
-    unsigned int first_item[3] = {0, 0, 0};
-    heap_add(&heap, &conformances, first_item);
-    set_add(&visited, first_item);
+    unsigned int * heap_data = malloc(
+        HEAP_CAPACITY * sizeof(unsigned int));
+    if (heap_data == NULL) {
+        fprintf(stderr, "Failed to allocate heap_data.");
+        return 5;
+    }
+    // IndicesHeap heap = {heap_data, 0, 100, 3};
 
-    unsigned int solution[3];
-    while (foo(&conformances, &heap, &visited, solution)) {
-        unsigned int i, j;
-        for (i = 0; i < 3; ++i) {
-            printf("%u ", solution[i]);
+    unsigned int * visited_data = malloc(
+        VISITED_CAPACITY * sizeof(unsigned int));
+    if (visited_data == NULL) {
+        fprintf(stderr, "Failed to allocate visited_data.");
+        return 5;
+    }
+    // VisitedSet visited = {visited_data, 0, 100, 3};
+
+    unsigned int * solution = malloc(
+        SOLUTION_CAPACITY * sizeof(unsigned int));
+    if (solution == NULL) {
+        fprintf(stderr, "Failed to allocate solution.");
+        return 5;
+    }
+
+    char data[21] = "AB2C30405060708090A";
+    unsigned int result[10];
+    if (decode_hex_grid(data, 20, result)) {
+        unsigned int i;
+        for (i = 0; i < 10; ++i) {
+            printf("%u, ", result[i]);
         }
-        printf("(%u), ", get_conformance(&conformances, solution));
+        printf("\n");
+    }
+
+
+
+    // printf("%u\n", index_of(indices, 4, 2));
+    // while (FCGI_Accept() >= 0) {
+    //     printf("Content-type: text/html\r\n"
+    //        "\r\n"
+    //        "<title>FastCGI Hello! (C, fcgi_stdio library)</title>"
+    //        "<h1>FastCGI Hello! (C, fcgi_stdio library)</h1>"
+    //        "Request number running on host\n");
+    // }
+
+    // heap_add(&heap, &conformances, first_item);
+    // set_add(&visited, first_item);
+
+    // unsigned int solution[3];
+    // while (foo(&conformances, &heap, &visited, solution)) {
+    //     unsigned int i, j;
+    //     for (i = 0; i < 3; ++i) {
+    //         printf("%u ", solution[i]);
+    //     }
+    //     printf("(%u), ", get_conformance(&conformances, solution));
 
         // printf("heap: ");
         // for (i = 0; i < heap.length; ++i) {
@@ -323,8 +397,8 @@ int main()
         //     printf("; ");
         // }
         // printf("\n");
-    }
-    printf("\n");
+    // }
+    // printf("\n");
 
 
     // unsigned int indices[][3] = {
@@ -356,15 +430,6 @@ int main()
     //         printf("%u ", result[i]);
     //     }
     //     printf("(%u)\n", get_conformance(&conformances, result));
-    // }
-
-    //printf("%u\n", index_of(indices, 4, 2));
-    // while (FCGI_Accept() >= 0) {
-    //     printf("Content-type: text/html\r\n"
-    //        "\r\n"
-    //        "<title>FastCGI Hello! (C, fcgi_stdio library)</title>"
-    //        "<h1>FastCGI Hello! (C, fcgi_stdio library)</h1>"
-    //        "Request number running on host\n");
     // }
 
     return 0;
