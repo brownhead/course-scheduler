@@ -1,13 +1,5 @@
 import heapq
 
-def index_of(indices, width):
-    result = 0
-    running_product = 1
-    for i in indices:
-        result += i * running_product
-        running_product *= width
-    return result
-
 def neighbors(indices):
     # Make indices mutable
     indices = list(indices)
