@@ -1,3 +1,4 @@
+
 // #include <fcgi_stdio.h>
 
 #include <stdio.h>
@@ -309,6 +310,128 @@ int decode_hex_grid(char const * data, unsigned int data_size,
     }
 }
 
+unsigned int decode_base10_number(char const * data, unsigned int data_size) {
+    unsigned int result = 0;
+    unsigned int weight = 1;
+    int i;
+    for (i = data_size - 1; i >= 0; --i) {
+        char numeral = data[i];
+        if (numeral >= '0' && numeral <= '9') {
+            result += ((unsigned int)(numeral - '0')) * weight;
+            weight *= 10;
+        } else {
+            return 0;
+        }
+    }
+
+    return result;
+}
+
+typedef struct {
+    unsigned int number;
+    unsigned int days[7]; // set to 1 if meets that day, 0 otherwise
+    unsigned int time_start;
+    unsigned int time_end;
+} Section;
+
+typedef struct {
+    char * name;
+    unsigned int nsections;
+    unsigned int * lengths;
+    Section * * sections;
+} Course;
+
+void generate_courses(Course * * courses, unsigned int * ncourses) {
+    *ncourses = 30;
+    *courses = malloc(sizeof(Course) * (*ncourses));
+
+    unsigned int i, j, k, l;
+    for (i = 0; i < *ncourses; ++i) {
+        Course * cur_course = (*courses) + i;
+
+        // Generate the course name
+        cur_course->name = malloc(10);
+        sprintf(cur_course->name, "CS %u", i);
+
+        // Figure out how many secionts there are and allocate memory for them
+        cur_course->nsections = rand() % 10 + 1;
+        cur_course->sections = malloc(
+            sizeof(Section *) * cur_course->nsections);
+        cur_course->lengths = malloc(
+            sizeof(unsigned int) * cur_course->nsections);
+        for (j = 0; j < cur_course->nsections; ++j) {
+            cur_course->lengths[j] = rand() % 10 + 1;
+            cur_course->sections[j] = malloc(
+                sizeof(Section) * cur_course->lengths[j]);
+        }
+
+        // Make data for the sections
+        unsigned int section_counter = 1;
+        for (j = 0; j < cur_course->nsections; ++j) {
+            for (k = 0; k < cur_course->lengths[j]; ++k) {
+                Section * cur_section = cur_course->sections[j] + k;
+                cur_section->number = section_counter++;
+
+                // Figure out what days the calss meets
+                int nmeetups = 0;
+                for (l = 0; l < 5; ++l) {
+                    cur_section->days[l] = rand() % 2;
+                    if (cur_section->days[l]) {
+                        nmeetups++;
+                    }
+                }
+                if (nmeetups == 0) {
+                    cur_section->days[rand() % 5] = 1;
+                }
+
+                // Figure out the meeting times
+                cur_section->time_start = rand() % 12 + 6;
+                cur_section->time_end = rand() % 12  + 6;
+                if (cur_section->time_start > cur_section->time_end) {
+                    unsigned int buf = cur_section->time_start;
+                    cur_section->time_start = cur_section->time_end;
+                    cur_section->time_end = buf;
+                }
+            }
+        }
+    }
+}
+
+void print_course(Course const * course) {
+    char const * DAYS = "MTWRFSU";
+    unsigned int const NDAYS = 7;
+
+    printf("> %s", course->name);
+    unsigned int i, j, k;
+    for (i = 0; i < course->nsections; ++i) {
+        for (j = 0; j < course->lengths[i]; ++j) {
+            printf("\tSECTION %u: ", course->sections[i][j].number);
+
+            // Print the days they meet
+            char dayman[NDAYS + 1];
+            int cur_day = 0;
+            for (k = 0; k < NDAYS; ++k) {
+                if (course->sections[i][j].days[k]) {
+                    dayman[cur_day++] = DAYS[k];
+                }
+            }
+            dayman[cur_day] = '\0';
+            printf("\t\tMeets on %s", dayman);
+
+            // Print the times they meet
+            printf(" from %u to %u.\n", course->sections[i][j].time_start,
+                course->sections[i][j].time_end);
+        }
+    }
+}
+
+void print_courses(Course const * courses, unsigned int ncourses) {
+    unsigned int i;
+    for (i = 0; i < ncourses; ++i) {
+        print_course(courses + i);
+    }
+}
+
 unsigned int const
     CONFORMANCES_LIST_CAPACITY = 1000,
     CONFORMANCES_LENGTHS_CAPACITY = 500,
@@ -318,6 +441,8 @@ unsigned int const
 
 int main()
 {
+    srand(time(NULL));
+
     unsigned int * conformances_lists = malloc(
         CONFORMANCES_LIST_CAPACITY * sizeof(unsigned int));
     if (conformances_lists == NULL) {
@@ -357,17 +482,23 @@ int main()
         return 5;
     }
 
-    char data[21] = "AB2C30405060708090A";
-    unsigned int result[10];
-    if (decode_hex_grid(data, 20, result)) {
-        unsigned int i;
-        for (i = 0; i < 10; ++i) {
-            printf("%u, ", result[i]);
-        }
-        printf("\n");
-    }
+    Course * courses;
+    unsigned int ncourses;
+    generate_courses(&courses, &ncourses);
 
+    print_courses(courses, ncourses);
 
+    // char data[21] = "AB2C30405060708090A";
+    // unsigned int result[10];
+    // if (decode_hex_grid(data, 20, result)) {
+    //     unsigned int i;
+    //     for (i = 0; i < 10; ++i) {
+    //         printf("%u, ", result[i]);
+    //     }
+    //     printf("\n");
+    // }
+
+    // printf("%u\n", decode_base10_number("1234", 4));
 
     // printf("%u\n", index_of(indices, 4, 2));
     // while (FCGI_Accept() >= 0) {
