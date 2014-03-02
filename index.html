@@ -18,19 +18,19 @@
 
     <div class="container">
         <div class="row">
-            <div class="col-md-3">
-                <form role="form">
+            <div class="col-md-3" id="left-side">
+                <form id="schedule-form" role="form" method="post" action="http://localhost:8080/schedule">
                     <div id="classes-submit" class="form-group">
                     </div>
                     <button type="button" class="btn btn-default" onclick="Classes.expand()">More</button>
                     <button type="submit" class="btn btn-primary">Plan my schedule</button>
                 </form>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" id="content">
                 <table id="week-table" class="table table-bordered">
                 </table>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3" id="right-side">
                 <button type="button" class="btn btn-default" onclick="Table.changeSelection(0)">Good</button>
                 <button type="button" class="btn btn-default" onclick="Table.changeSelection(1)">Bad</button>
                 <button type="button" class="btn btn-default" onclick="Table.encoded()">Encoding</button>
@@ -46,5 +46,6 @@
     <!-- Custom JS -->
     <script src="js/table.js"></script>
     <script src="js/classes.js"></script>
+    <script src="js/results.js"></script>
 </body>
 </html>

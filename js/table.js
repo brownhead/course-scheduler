@@ -18,20 +18,20 @@ Table.generate = function() {
         .append("<td id='" + (Table.cell_id++).toString() + "'>Wednesday</td>")
         .append("<td id='" + (Table.cell_id++).toString() + "'>Thursday</td>")
         .append("<td id='" + (Table.cell_id++).toString() + "'>Friday</td>")
+        .append("<td id='" + (Table.cell_id++).toString() + "'>Saturday</td>")
+        .append("<td id='" + (Table.cell_id++).toString() + "'>Sunday</td>")
     $table.append($row);
 
     var hour = 7; //Hour of...
-    var minute = 0;
-    var increment = 30; //Increments of... in minutes
     for (var i = 0; i < 14; ++i) {
         var $row = $(document.createElement("tr"));
         $row.attr("id", i.toString());
-        for (var j = 0; j < 5; ++j) {
+        for (var j = 0; j < 7; ++j) {
             var $cell = $(document.createElement("td"));
             $cell.attr("id", Table.cell_id.toString())
                  .attr("onmousedown", "Table.highlight(this)");
             $cell.append(hour.toString() + ":00");
-            Table.cells.push($cell)
+            Table.cells.push({ obj: $cell, day: j, hour: i })
             Table.cell_id++;
             $row.append($cell);
         }
@@ -64,15 +64,16 @@ Table.highlight = function (cell) {
 }
 
 Table.encoded = function() {
-    var encodedString = "";
+    var encodedTable = "";
     for (var i = 0; i < Table.cells.length; ++i) {
-        if (Table.cells[i].hasClass("success"))
-            encodedString += "01";
-        else if (Table.cells[i].hasClass("danger"))
-            encodedString += "02";
+        if (Table.cells[i].obj.hasClass("success")) 
+            encodedTable += "02";
+        else if (Table.cells[i].obj.hasClass("danger"))
+            encodedTable += "00";
         else
-            encodedString += "00";
+            encodedTable += "01";
     }
-
-    return encodedString;    
+   
+    console.log(encodedTable + ",0,6,7,19");
+    return encodedTable + ",0,6,7,19";
 }
